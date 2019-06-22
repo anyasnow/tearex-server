@@ -1,0 +1,4 @@
+TRUNCATE
+  tearex_users,
+  teas
+  RESTART IDENTITY CASCADE;
