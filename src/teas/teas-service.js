@@ -10,7 +10,13 @@ const TeasService = {
             .select('*')
     },
 
-
+    insertTea(db, newTea) {
+        return db
+            .insert(newTea)
+            .into('teas')
+            .returning('*')
+            .then(rows => { return rows[0] })
+    },
 
     getTeaById(db, id) {
         return TeasService.getAllTeas(db)
@@ -18,12 +24,30 @@ const TeasService = {
             .first()
     },
 
+    deleteTea(db, id) {
+        return db('teas')
+            .where({ id })
+            .delete()
+    },
+
+    // deleteTea(db, id) {
+    //     return db('teas')
+    //         .where('id', id)
+    //         .delete()
+    // }
+
+    updateTea(db, id, fields) {
+        return db('teas')
+            .where({ id })
+            .update(fields)
+    },
+
 
     serializeTea(tea) {
         return {
             id: tea.id,
             user_name: tea.user_name || {}, //code won't break if no user - empty object still truthy
-            teaName: xss(tea.teaName),
+            teaName: xss(tea.teaname),
             brand: xss(tea.brand),
             type: xss(tea.type),
             packaging: xss(tea.packaging),
@@ -31,22 +55,7 @@ const TeasService = {
         }
     },
 
-    //POST
-
-    //PACH
-
-    deleteTea(db, id) {
-        return db('teas')
-            .where('id', id)
-            .delete()
-
-    }
-
 }
-
-
-
-
 
 
 

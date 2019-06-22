@@ -9,20 +9,58 @@ teasRouter
     .get((req, res, next) => {
         TeasService.getAllTeas(req.app.get('db')) //what to pass as second param to only get tea for specific user?
             .then(teas => {
-                res.json(teas);
+                res.json(teas);  //res.json(teas.map(seralizeTea))
+            })
+            .catch(next)
+    })
+    .post(jsonBodyParser, (req, res, next) => {
+        const { teaname, brand, type, packaging, notes } = req.body
+        const newTea = { teaname, brand, type, packaging, notes }
+
+        for (const [key, value] of Object.entries(newTea))
+            if (value == null)
+                return res.status(400).json({
+                    error: { message: `Missing '${key}' in request body` }
+                })
+
+        TeasService.insertTea(req.app.get('db'), newTea)
+            .then(tea => {
+                return res
+                    .location(`/teas/${tea.id}`)
+                    .json(tea)
             })
             .catch(next)
     })
 
 
+    .delete((req, res, next) => {
+        WatchedListService.deleteMedia(req.app.get('db'), req.params.id)
+            .then(() => {
+                return res
+                    .status(200)
+                    .json('deleted')
+            })
+            .catch(next)
+    })
 teasRouter
     .route('/:tea_id')
     // .all(requireAuth)
     .all(checkTeaExists)
-    .get((req, res) => {
+    .get((req, res, next) => {
         res.json(res.tea)
     })
 
+teasRouter
+    .route('/:tea_id') //add checkTeaExists
+    .delete((req, res, next) => {
+        TeasService.deleteTea(req.app.get('db'), req.params.tea_id)
+            .then(() => {
+                return res
+                    .status(200)
+                    .json('deleted')
+            })
+            .catch(next)
+    })
 
 /* async/await syntax for promises */
 async function checkTeaExists(req, res, next) {
