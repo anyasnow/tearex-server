@@ -33,15 +33,7 @@ teasRouter
     })
 
 
-    .delete((req, res, next) => {
-        WatchedListService.deleteMedia(req.app.get('db'), req.params.id)
-            .then(() => {
-                return res
-                    .status(200)
-                    .json('deleted')
-            })
-            .catch(next)
-    })
+
 teasRouter
     .route('/:tea_id')
     // .all(requireAuth)
@@ -51,7 +43,22 @@ teasRouter
     })
 
 teasRouter
-    .route('/:tea_id') //add checkTeaExists
+    .route('/:tea_id')//how to incorporate checkTeaExists?
+    .patch(jsonBodyParser, (req, res, next) => {
+        const { teaname, brand, type, packaging, notes } = req.body
+        const updatedTea = { teaname, brand, type, packaging, notes }
+
+        TeasService.updateTea(req.app.get('db'), req.params.tea_id, updatedTea)
+            .then(tea => {
+                return res
+                    .location(`/teas/${tea.id}`)
+                    .json(tea)
+            })
+            .catch(next)
+    })
+
+teasRouter
+    .route('/:tea_id') //how to incorporate checkTeaExists?
     .delete((req, res, next) => {
         TeasService.deleteTea(req.app.get('db'), req.params.tea_id)
             .then(() => {

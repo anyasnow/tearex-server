@@ -26,15 +26,10 @@ const TeasService = {
 
     deleteTea(db, id) {
         return db('teas')
-            .where({ id })
+            .where('id', id)  //  can also user .where({ id })
             .delete()
     },
 
-    // deleteTea(db, id) {
-    //     return db('teas')
-    //         .where('id', id)
-    //         .delete()
-    // }
 
     updateTea(db, id, fields) {
         return db('teas')
