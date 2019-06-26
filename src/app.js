@@ -19,7 +19,6 @@ const morganOption = (NODE_ENV === 'production')
 app.use(cors())
 app.options('*', cors())
 app.use(morgan(morganOption))
-// app.use(cors({ origin: CLIENT_ORIGIN }));
 app.use(helmet())
 
 app.use('/teas', teasRouter)

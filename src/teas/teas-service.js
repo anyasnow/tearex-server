@@ -42,14 +42,13 @@ const TeasService = {
         return {
             id: tea.id,
             user_name: tea.user_name || {}, //code won't break if no user - empty object still truthy
-            teaName: xss(tea.teaname),
-            brand: xss(tea.brand),
-            type: xss(tea.type),
-            packaging: xss(tea.packaging),
-            note: xss(tea.note),
+            teaname: xss(tea.teaname) || {},
+            brand: xss(tea.brand) || {},
+            type: xss(tea.type) || {},
+            packaging: xss(tea.packaging) || {},
+            note: xss(tea.note) || {},
         }
     },
-
 }
 
 

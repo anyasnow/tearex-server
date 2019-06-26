@@ -4,12 +4,13 @@ const TeasService = require('./teas-service')
 const jsonBodyParser = express.json()
 const teasRouter = express.Router()
 
+
 teasRouter
     .route('/')
     .get((req, res, next) => {
         TeasService.getAllTeas(req.app.get('db')) //what to pass as second param to only get tea for specific user?
             .then(teas => {
-                res.json(teas);  //res.json(teas.map(seralizeTea))
+                res.json(teas);  //res.json(teas.map(TeasService.seralizeTea))
             })
             .catch(next)
     })
@@ -17,15 +18,16 @@ teasRouter
         const { teaname, brand, type, packaging, notes } = req.body
         const newTea = { teaname, brand, type, packaging, notes }
 
-        for (const [key, value] of Object.entries(newTea))
-            if (value == null)
-                return res.status(400).json({
-                    error: { message: `Missing '${key}' in request body` }
-                })
+        // for (const [key, value] of Object.entries(newTea))
+        //     if (value == null)
+        //         return res.status(400).json({
+        //             error: { message: `Missing '${key}' in request body` }
+        //         })
 
         TeasService.insertTea(req.app.get('db'), newTea)
             .then(tea => {
                 return res
+                    .status(201)
                     .location(`/teas/${tea.id}`)
                     .json(tea)
             })
@@ -43,7 +45,8 @@ teasRouter
     })
 
 teasRouter
-    .route('/:tea_id')//how to incorporate checkTeaExists?
+    .route('/:tea_id')
+    .all(checkTeaExists)
     .patch(jsonBodyParser, (req, res, next) => {
         const { teaname, brand, type, packaging, notes } = req.body
         const updatedTea = { teaname, brand, type, packaging, notes }
@@ -58,13 +61,14 @@ teasRouter
     })
 
 teasRouter
-    .route('/:tea_id') //how to incorporate checkTeaExists?
+    .route('/:tea_id')
+    .all(checkTeaExists)
     .delete((req, res, next) => {
         TeasService.deleteTea(req.app.get('db'), req.params.tea_id)
             .then(() => {
                 return res
-                    .status(200)
                     .json('deleted')
+                    .status(204)
             })
             .catch(next)
     })
