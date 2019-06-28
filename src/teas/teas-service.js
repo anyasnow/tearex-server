@@ -10,6 +10,13 @@ const TeasService = {
             .select('*')
     },
 
+    getAllTeasbyUser(db, user_id) { //how to get teas for user user_id?
+        return db
+            .from('teas')
+            .select('*')
+            .where('user_id', user_id)
+    },
+
     insertTea(db, newTea) {
         return db
             .insert(newTea)
