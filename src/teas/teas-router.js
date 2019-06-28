@@ -1,12 +1,13 @@
 const express = require('express')
 const TeasService = require('./teas-service')
-// const { requireAuth } = require('../middleware/jwt-auth')
+const { requireAuth } = require('../middleware/jwt-auth')
 const jsonBodyParser = express.json()
 const teasRouter = express.Router()
 
 
 teasRouter
     .route('/')
+    // .all(requireAuth)
     .get((req, res, next) => {
         TeasService.getAllTeas(req.app.get('db')) //what to pass as second param to only get tea for specific user?
             .then(teas => {
@@ -18,11 +19,7 @@ teasRouter
         const { teaname, brand, type, packaging, notes } = req.body
         const newTea = { teaname, brand, type, packaging, notes }
 
-        // for (const [key, value] of Object.entries(newTea))
-        //     if (value == null)
-        //         return res.status(400).json({
-        //             error: { message: `Missing '${key}' in request body` }
-        //         })
+        // newTea.user_id = req.user.id
 
         TeasService.insertTea(req.app.get('db'), newTea)
             .then(tea => {
@@ -33,6 +30,19 @@ teasRouter
             })
             .catch(next)
     })
+
+teasRouter
+    .route('/:user_id')
+    // .all(requireAuth)
+    .get((req, res, next) => {
+        TeasService.getAllTeasbyUser(req.app.get('db'), req.params.user_id) //what to pass as second param to only get tea for specific user?
+            .then(teas => {
+                res.json(teas);  //res.json(teas.map(TeasService.seralizeTea))
+            })
+            .catch(next)
+    })
+
+
 
 
 
@@ -46,6 +56,7 @@ teasRouter
 
 teasRouter
     .route('/:tea_id')
+    // .all(requireAuth)
     .all(checkTeaExists)
     .patch(jsonBodyParser, (req, res, next) => {
         const { teaname, brand, type, packaging, notes } = req.body
@@ -62,6 +73,7 @@ teasRouter
 
 teasRouter
     .route('/:tea_id')
+    // .all(requireAuth)
     .all(checkTeaExists)
     .delete((req, res, next) => {
         TeasService.deleteTea(req.app.get('db'), req.params.tea_id)

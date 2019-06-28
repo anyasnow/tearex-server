@@ -1,37 +1,46 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const config = require('../config')
+const express = require('express')
+const authRouter = express.Router()
+const jsonBodyParser = express.json()
+const AuthService = require('./auth-service')
 
-const AuthService = {
-    getUserWithUserName(db, user_name) {
-        return db('tearex_users')
-            .where({ user_name })
-            .first()
-    },
+authRouter
+    .post('/', jsonBodyParser, (req, res, next) => {
+        const { user_name, password } = req.body
+        const loginUser = { user_name, password }
 
-    parseBasicToken(token) {
-        return Buffer
-            .from(token, 'base64')
-            .toString()
-            .split(':')
-    },
+        for (const [key, value] of Object.entries(loginUser))
+            if (value == null)
+                return res.status(400).json({
+                    error: `Missing '${key}' in request body`
+                })
 
-    comparePasswords(password, hash) {
-        return bcrypt.compare(password, hash)
-    },
+        AuthService.getUserWithUserName(
+            req.app.get('db'),
+            loginUser.user_name
+        )
+            .then(dbUser => {
+                if (!dbUser)
+                    return res.status(400).json({
+                        error: 'Incorrect username or password',
+                    })
 
-    createJwt(subject, payload) {
-        return jwt.sign(payload, config.JWT_SECRET, {
-            subject,
-            algorithm: 'HS256',
-        })
-    },
 
-    verifyJwt(token) {
-        return jwt.verify(token, config.JWT_SECRET, {
-            algorithms: ['HS256'],
-        })
-    },
-}
+                return AuthService.comparePasswords(loginUser.password, dbUser.password)
+                    .then(compareMatch => {
+                        if (!compareMatch)
+                            return res.status(400).json({
+                                error: 'Incorrect username or password',
+                            })
 
-module.exports = AuthService
+                        const sub = dbUser.user_name
+                        const payload = { user_id: dbUser.id }
+                        res.send({
+                            authToken: AuthService.createJwt(sub, payload),
+                        })
+                    })
+            })
+
+            .catch(next)
+    })
+
+module.exports = authRouter
