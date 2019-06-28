@@ -7,7 +7,7 @@ const { NODE_ENV } = require('./config')
 // const { CLIENT_ORIGIN } = require('./config');
 const teasRouter = require('./teas/teas-router')
 const usersRouter = require('./users/users-router')
-// const authRouter = require('./auth/auth-router')
+const authRouter = require('./auth/auth-router')
 
 
 const app = express()
@@ -21,9 +21,9 @@ app.options('*', cors())
 app.use(morgan(morganOption))
 app.use(helmet())
 
-app.use('/teas', teasRouter)
-app.use('/users', usersRouter)
-// app.use('/api/authorization', authRouter)
+app.use('/api/teas', teasRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/login', authRouter)
 
 
 app.use(function errorHandler(error, req, res, next) {

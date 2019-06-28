@@ -18,6 +18,14 @@ const TeasService = {
             .then(rows => { return rows[0] })
     },
 
+    getTeaByUser(db, user_id) {
+        return db
+            .from('teas')
+            .select('*')
+            .where('user_id', user_id)
+            .first()
+    },
+
     getTeaById(db, id) {
         return TeasService.getAllTeas(db)
             .where('id', id)
