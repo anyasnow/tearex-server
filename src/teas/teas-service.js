@@ -4,13 +4,13 @@ const xss = require('xss')
 const TeasService = {
 
 
-    getAllTeas(db) { //how to get teas for user user_id?
+    getAllTeas(db) {
         return db
             .from('teas')
             .select('*')
     },
 
-    getAllTeasbyUser(db, user_id) { //how to get teas for user user_id?
+    getAllTeasbyUser(db, user_id) {
         return db
             .from('teas')
             .select('*')
@@ -21,34 +21,39 @@ const TeasService = {
         return db
             .insert(newTea)
             .into('teas')
+            .where('user_id', newTea.user_id)
             .returning('*')
             .then(rows => { return rows[0] })
     },
 
-    getTeaByUser(db, user_id) {
+    // getTeaByUser(db, user_id) {
+    //     return db
+    //         .from('teas')
+    //         .select('*')
+    //         .where('user_id', user_id)
+    //         .first()
+    // },
+
+    getTeaById(db, { user_id, tea_id }) {
         return db
             .from('teas')
-            .select('*')
             .where('user_id', user_id)
-            .first()
+            .where('id', tea_id);
     },
 
-    getTeaById(db, id) {
-        return TeasService.getAllTeas(db)
-            .where('id', id)
-            .first()
-    },
-
-    deleteTea(db, id) {
-        return db('teas')
-            .where('id', id)  //  can also user .where({ id })
+    deleteTea(db, { user_id, tea_id }) {
+        return db
+            .from('teas')
+            .where('user_id', user_id)
+            .where('id', tea_id)
             .delete()
     },
 
 
-    updateTea(db, id, fields) {
+    updateTea(db, { user_id, tea_id }, fields) {
         return db('teas')
-            .where({ id })
+            .where('user_id', user_id)
+            .where('id', tea_id)
             .update(fields)
     },
 
